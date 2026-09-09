@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class AssignmentListScreen extends StatelessWidget {
+class AssignmentListScreen extends StatefulWidget {
   const AssignmentListScreen({super.key});
 
   @override
@@ -38,9 +38,8 @@ void _showAddAssignmentDialog() {
                 setState(() {
                   _assignments.add({'title': newAssignmentTitle.trim(), 'completed': false});
                 });
-              });
-            }
-            Navigator.pop(context);
+              }
+              Navigator.pop(context);
             },
             child: const Text('Add'),
           ),
