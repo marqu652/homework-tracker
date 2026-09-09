@@ -56,6 +56,50 @@ void _toggleCompleted(int index, bool? value) {
   });
 }
 
+Future<void> _showEditAssignmentDialog(int index) async {
+  final controller = TextEditingController(
+    text: _assignments[index]['title'] as String,
+  );
+
+  final updatedTitle = await showDialog<String>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Edit Assignment'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'Enter assignment title',
+          ),
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => Navigator.pop(context, controller.text),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text),
+            child: const Text('Save'),
+          ),
+        ],
+      );
+    },
+  );
+  controller.dispose();
+
+  final title = updatedTitle?.trim();
+  if (!mounted || title == null || title.isEmpty) {
+    return;
+  }
+
+  setState(() {
+    _assignments[index]['title'] = title;
+  });
+}
+
 @override
 Widget build(BuildContext context) {
   return Scaffold(
@@ -67,6 +111,11 @@ Widget build(BuildContext context) {
           title: Text(_assignments[index]['title']),
           value: _assignments[index]['completed'],
           onChanged: (value) => _toggleCompleted(index, value),
+          secondary: IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: 'Edit assignment',
+            onPressed: () => _showEditAssignmentDialog(index),
+          ),
         );
       },
     ),
