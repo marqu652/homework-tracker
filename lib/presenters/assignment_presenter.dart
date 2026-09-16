@@ -12,5 +12,16 @@ class AssignmentPresenter {
   void toggleCompleted(int index) {
     _assignments[index].isCompleted = !_assignments[index].isCompleted;
   }
+
+  void clearAssignments() {
+    _assignments.clear();
+  }
+
+  void removeAssignments(Set<int> indexes) {
+    final sortedIndexes = indexes.toList()..sort((a, b) => b.compareTo(a));
+    for (final index in sortedIndexes) {
+      _assignments.removeAt(index);
+    }
+  }
 }
 

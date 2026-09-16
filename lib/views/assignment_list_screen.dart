@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../presenters/assignment_presenter.dart';
-import '../models/assignment_model.dart';
 
 class AssignmentListScreen extends StatefulWidget {
   const AssignmentListScreen({super.key});
@@ -13,7 +12,71 @@ class AssignmentListScreen extends StatefulWidget {
 class _AssignmentListScreenState extends State<AssignmentListScreen> {
  
  final AssignmentPresenter _presenter = AssignmentPresenter();
-final List<Map<String, dynamic>> _assignments = [];
+final Set<int> _selectedAssignments = <int>{};
+
+Future<void> _confirmDeleteAll() async {
+  if (_presenter.assignments.isEmpty) {
+    return;
+  }
+
+  final shouldDelete = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Delete all assignments?'),
+      content: const Text('This action cannot be undone.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Delete all'),
+        ),
+      ],
+    ),
+  );
+
+  if (shouldDelete == true && mounted) {
+    setState(() {
+      _presenter.clearAssignments();
+      _selectedAssignments.clear();
+    });
+  }
+}
+
+Future<void> _confirmDeleteSelected() async {
+  if (_selectedAssignments.isEmpty) {
+    return;
+  }
+
+  final shouldDelete = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Delete selected assignments?'),
+      content: Text(
+        'Delete ${_selectedAssignments.length} selected assignment(s)?',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Delete selected'),
+        ),
+      ],
+    ),
+  );
+
+  if (shouldDelete == true && mounted) {
+    setState(() {
+      _presenter.removeAssignments(_selectedAssignments);
+      _selectedAssignments.clear();
+    });
+  }
+}
 
 void _showAddAssignmentDialog() {
   String newAssignmentTitle = '';
@@ -55,68 +118,56 @@ void _showAddAssignmentDialog() {
 
 
 
-Future<void> _showEditAssignmentDialog(int index) async {
-  final controller = TextEditingController(
-    text: _assignments[index]['title'] as String,
-  );
-
-  final updatedTitle = await showDialog<String>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Edit Assignment'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Enter assignment title',
-          ),
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) => Navigator.pop(context, controller.text),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('Save'),
-          ),
-        ],
-      );
-    },
-  );
-  controller.dispose();
-
-  final title = updatedTitle?.trim();
-  if (!mounted || title == null || title.isEmpty) {
-    return;
-  }
-
-  setState(() {
-    _assignments[index]['title'] = title;
-  });
-}
-
 @override
 Widget build(BuildContext context) {
   final assignments = _presenter.assignments;
 
   return Scaffold(
-    appBar: AppBar(title: const Text('Assignments')),
+    appBar: AppBar(
+      title: const Text('Assignments'),
+      actions: [
+        IconButton(
+          onPressed: _selectedAssignments.isEmpty
+              ? null
+              : _confirmDeleteSelected,
+          tooltip: 'Delete selected assignments',
+          icon: const Icon(Icons.delete),
+        ),
+        IconButton(
+          onPressed: assignments.isEmpty ? null : _confirmDeleteAll,
+          tooltip: 'Delete all assignments',
+          icon: const Icon(Icons.delete_sweep),
+        ),
+      ],
+    ),
     body: ListView.builder(
       itemCount: assignments.length,
       itemBuilder: (context, index) {
         final assignment = assignments[index];
-        return CheckboxListTile(
-          title: Text(assignment.title),
-          value: assignment.isCompleted,
-          onChanged: (value) {
+        return ListTile(
+          onTap: () {
             setState(() {
               _presenter.toggleCompleted(index);
             });
           },
+          title: Text(
+            assignment.title,
+            style: assignment.isCompleted
+                ? const TextStyle(decoration: TextDecoration.lineThrough)
+                : null,
+          ),
+          trailing: Checkbox(
+            value: _selectedAssignments.contains(index),
+            onChanged: (selected) {
+              setState(() {
+                if (selected == true) {
+                  _selectedAssignments.add(index);
+                } else {
+                  _selectedAssignments.remove(index);
+                }
+              });
+            },
+          ),
         );
       },
     ),
