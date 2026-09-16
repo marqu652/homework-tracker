@@ -1,14 +1,14 @@
 import '../models/assignment_model.dart';
 
 class AssignmentPresenter {
-  final List<Assignment> _assignment = [];
+  final List<Assignment> _assignments = [];
 
-  List<Assignment> get assignments => _assignment;
+  List<Assignment> get assignments => _assignments;
   void addAssignment(String title) {
-    _assignment.add(Assignment(title: title));
+    _assignments.add(Assignment(title: title));
   }
-  void toggleAssignmentCompletion(int index) {
-    _assignment[index].isCompleted = !_assignment[index].isCompleted;
+  void toggleCompleted(int index) {
+    _assignments[index].isCompleted = !_assignments[index].isCompleted;
   }
 }
 
