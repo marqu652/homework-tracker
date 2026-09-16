@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../presenters/assignment_presenter.dart';
+import '../models/assignment_model.dart';
 
 class AssignmentListScreen extends StatefulWidget {
   const AssignmentListScreen({super.key});
@@ -8,10 +9,11 @@ class AssignmentListScreen extends StatefulWidget {
   State<AssignmentListScreen> createState() => _AssignmentListScreenState();
 }
 
+
 class _AssignmentListScreenState extends State<AssignmentListScreen> {
  
  final AssignmentPresenter _presenter = AssignmentPresenter();
-
+final List<Map<String, dynamic>> _assignments = [];
 
 void _showAddAssignmentDialog() {
   String newAssignmentTitle = '';
@@ -125,3 +127,4 @@ Widget build(BuildContext context) {
   );
 }
 }
+
