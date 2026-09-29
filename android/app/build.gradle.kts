@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase-bom:33.13.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
 }
 
 android {
