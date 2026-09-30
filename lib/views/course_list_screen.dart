@@ -10,10 +10,22 @@ class CourseListScreen extends StatefulWidget {
 
 class _CourseListScreenState extends State<CourseListScreen> {
   final CoursePresenter presenter = CoursePresenter();
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCourses();
+  }
+
+  Future<void> _loadCourses() async {
+    await presenter.loadCourses();
+    setState(() => _isLoading = false);
+  }
 
   void _showAddCourseDialog() {
-    String newCourseName = '';
-    String newCourseDescription = '';
+    String name = '';
+    String description = '';
 
     showDialog(
       context: context,
@@ -25,11 +37,11 @@ class _CourseListScreenState extends State<CourseListScreen> {
             children: [
               TextField(
                 decoration: const InputDecoration(labelText: 'Course Name'),
-                onChanged: (value) => newCourseName = value,
+                onChanged: (value) => name = value,
               ),
               TextField(
                 decoration: const InputDecoration(labelText: 'Description (optional)'),
-                onChanged: (value) => newCourseDescription = value,
+                onChanged: (value) => description = value,
               ),
             ],
           ),
@@ -39,14 +51,10 @@ class _CourseListScreenState extends State<CourseListScreen> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                if (newCourseName.trim().isNotEmpty) {
-                  setState(() {
-                    presenter.addCourse(
-                      newCourseName.trim(),
-                      newCourseDescription.trim(),
-                    );
-                  });
+              onPressed: () async {
+                if (name.trim().isNotEmpty) {
+                  await presenter.addCourse(name.trim(), description);
+                  setState(() {});
                   Navigator.pop(context);
                 }
               },
@@ -64,8 +72,26 @@ class _CourseListScreenState extends State<CourseListScreen> {
 
       return Scaffold(
         appBar: AppBar(title: const Text('Courses')),
-        body: ListView.builder(
-          itemCount: courses.length,
+        body:
+          _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView.builder(
+              itemCount: courses.length, 
+              itemBuilder: (context, index) {
+                final course = courses[index];
+                return ListTile(
+                  title: Text(course.name),
+                  subtitle:
+                    course.description != null
+                      ? Text(course.description!)
+                      : null,
+                );
+              } 
+            ),
+        
+        
+         /* ListView.builder(
+           itemCount: courses.length,
           itemBuilder: (context, index) {
             final course = courses[index];
             return ListTile(
@@ -73,7 +99,7 @@ class _CourseListScreenState extends State<CourseListScreen> {
               subtitle: course.description != null ? Text(course.description!) : null,
             );
           },
-        ),
+        ), */
         floatingActionButton: FloatingActionButton(
           onPressed: _showAddCourseDialog,
           child: const Icon(Icons.add),
