@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:863281278979:android:7d4bc1718d5e8857489e36",
+        "android_client_info": {
+          "package_name": "com.example.homework_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5YSm3faKg_YegTYjZweezoD5-_s-kucc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:863281278979:android:6737975828e4dc7a489e36",
         "android_client_info": {
           "package_name": "com.marqu652.homeworktracker"
