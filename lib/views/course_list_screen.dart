@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../presenters/course_presenter.dart';
 
 class CourseListScreen extends StatefulWidget {
@@ -10,7 +11,9 @@ class CourseListScreen extends StatefulWidget {
 
 class _CourseListScreenState extends State<CourseListScreen> {
   final CoursePresenter presenter = CoursePresenter();
+  final TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -21,6 +24,12 @@ class _CourseListScreenState extends State<CourseListScreen> {
   Future<void> _loadCourses() async {
     await presenter.loadCourses();
     setState(() => _isLoading = false);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _showAddCourseDialog() {
@@ -40,7 +49,9 @@ class _CourseListScreenState extends State<CourseListScreen> {
                 onChanged: (value) => name = value,
               ),
               TextField(
-                decoration: const InputDecoration(labelText: 'Description (optional)'),
+                decoration: const InputDecoration(
+                  labelText: 'Description (optional)',
+                ),
                 onChanged: (value) => description = value,
               ),
             ],
@@ -66,31 +77,66 @@ class _CourseListScreenState extends State<CourseListScreen> {
     );
   }
 
-    @override
-    Widget build(BuildContext context) {
-      final courses = presenter.courses;
+  @override
+  Widget build(BuildContext context) {
+    final filteredCourses = presenter.courses
+        .where(
+          (course) =>
+              course.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+        )
+        .toList();
 
-      return Scaffold(
-        appBar: AppBar(title: const Text('Courses')),
-        body:
-          _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
-              itemCount: courses.length, 
-              itemBuilder: (context, index) {
-                final course = courses[index];
-                return ListTile(
-                  title: Text(course.name),
-                  subtitle:
-                    course.description != null
-                      ? Text(course.description!)
-                      : null,
-                );
-              } 
+    return Scaffold(
+      appBar: AppBar(title: const Text('Courses')),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) => setState(() => _searchQuery = value),
+                    decoration: InputDecoration(
+                      hintText: 'Search courses',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isEmpty
+                          ? null
+                          : IconButton(
+                              tooltip: 'Clear search',
+                              icon: const Icon(Icons.clear),
+                              onPressed: _searchController.clear,
+                            ),
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: filteredCourses.isEmpty
+                      ? Center(
+                          child: Text(
+                            _searchQuery.isEmpty
+                                ? 'No courses'
+                                : 'No courses found',
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: filteredCourses.length,
+                          itemBuilder: (context, index) {
+                            final course = filteredCourses[index];
+                            return ListTile(
+                              title: Text(course.name),
+                              subtitle: course.description != null
+                                  ? Text(course.description!)
+                                  : null,
+                            );
+                          },
+                        ),
+                ),
+              ],
             ),
-        
-        
-         /* ListView.builder(
+
+      /* ListView.builder(
            itemCount: courses.length,
           itemBuilder: (context, index) {
             final course = courses[index];
@@ -100,10 +146,10 @@ class _CourseListScreenState extends State<CourseListScreen> {
             );
           },
         ), */
-        floatingActionButton: FloatingActionButton(
-          onPressed: _showAddCourseDialog,
-          child: const Icon(Icons.add),
-        ),
-      );
-    }
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddCourseDialog,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
 }
