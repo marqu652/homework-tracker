@@ -3,6 +3,7 @@ import '../presenters/auth_presenter.dart';
 import 'main_navigation.dart';
 import 'signup_screen.dart';
 
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -56,7 +57,8 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: const InputDecoration(labelText: 'Password'),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
+            ElevatedButton(onPressed: _handleLogin, child: const Text('Login')),
+              TextButton(
               onPressed: () {
                 Navigator.push(
                   context,
